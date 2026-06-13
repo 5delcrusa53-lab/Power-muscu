@@ -1,1 +1,1059 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Programme — 5 Jours</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0d0d0f;
+      --surface:  #16161a;
+      --card:     #1e1e24;
+      --border:   #2a2a35;
+      --accent:   #ff5c00;
+      --accent2:  #ff8c42;
+      --green:    #00e07a;
+      --text:     #f0f0f5;
+      --muted:    #7a7a95;
+      --done-bg:  #0a2e1a;
+      --done-border: #00e07a33;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #1a0a00 0%, #0d0d0f 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 20px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    header h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    header h1 span { color: var(--accent); }
+    .header-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* WEEK PROGRESS BAR */
+    .week-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .week-dot {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .week-dot.active { background: var(--accent); }
+    .week-dot.done   { background: var(--green); }
+
+    /* DAY TABS */
+    .day-tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 16px 20px;
+      scrollbar-width: none;
+    }
+    .day-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+    .tab-btn .tab-day {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .tab-btn .tab-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .tab-btn.active {
+      border-color: var(--accent);
+      background: #1f0e00;
+    }
+    .tab-btn.active .tab-day { color: var(--accent); }
+    .tab-btn.tab-done {
+      border-color: var(--green);
+      background: #0a2e1a;
+    }
+    .tab-btn.tab-done .tab-day { color: var(--green); }
+
+    /* DAY VIEW */
+    .day-view { display: none; padding: 0 16px; }
+    .day-view.visible { display: block; }
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    .day-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .day-icon.push  { background: #2a0f00; }
+    .day-icon.pull  { background: #001a2a; }
+    .day-icon.legs  { background: #1a002a; }
+    .day-icon.upper { background: #002a1a; }
+    .day-icon.core  { background: #1a1a00; }
+
+    .day-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .day-title .accent { color: var(--accent); }
+    .day-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .day-progress {
+      margin-left: auto;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .day-progress .prog-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .day-progress .prog-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* EXERCISE CARD */
+    .exercise-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .exercise-card.done {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+    }
+
+    .ex-img-wrap {
+      position: relative;
+      height: 160px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .ex-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .exercise-card:hover .ex-img { transform: scale(1.04); }
+    .ex-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(13,13,15,0.9) 0%, rgba(13,13,15,0.1) 50%, transparent 100%);
+    }
+    .ex-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .ex-done-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--green);
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: none;
+    }
+    .exercise-card.done .ex-done-badge { display: block; }
+    .ex-img-name {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      right: 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .ex-body {
+      padding: 14px 14px 16px;
+    }
+
+    .ex-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .ex-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 3px 8px;
+    }
+    .ex-tag.highlight {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* SERIES DOTS */
+    .series-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .series-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .sdot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .sdot.done {
+      border-color: var(--green);
+      background: var(--green);
+      color: #000;
+    }
+    .series-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* CONTROLS ROW */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .timer-display {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      min-width: 80px;
+    }
+    .timer-display.running { color: var(--green); }
+    .timer-display.done-t  { color: var(--green); font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 600; }
+
+    .btn-go {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-transform: uppercase;
+    }
+    .btn-go:active { transform: scale(0.96); }
+    .btn-go:hover  { background: var(--accent2); }
+
+    .btn-serie {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-serie:hover { border-color: var(--green); color: var(--green); }
+
+    /* ALTERNATE EXERCISES */
+    .alt-toggle {
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      user-select: none;
+    }
+    .alt-toggle:hover { color: var(--text); }
+    .alt-toggle .chevron { transition: transform 0.2s; }
+    .alt-toggle.open .chevron { transform: rotate(180deg); }
+
+    .alt-list {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .alt-list.visible { display: block; }
+    .alt-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .alt-item:last-child { border-bottom: none; }
+    .alt-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .alt-name { font-size: 14px; flex: 1; }
+    .alt-sets { font-size: 12px; color: var(--muted); }
+
+    /* RESET DAY BUTTON */
+    .day-actions {
+      margin: 8px 0 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover { border-color: #ff4444; color: #ff4444; }
+
+    /* GLOBAL TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      transition: transform 0.3s;
+      z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* CIRCULAR PROGRESS on timer */
+    .timer-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mon <span>Programme</span> Semaine</h1>
+  <div class="header-sub">Intermédiaire · Salle de sport · 5 jours</div>
+  <div class="week-bar">
+    <div class="week-dot" id="wd0"></div>
+    <div class="week-dot" id="wd1"></div>
+    <div class="week-dot" id="wd2"></div>
+    <div class="week-dot" id="wd3"></div>
+    <div class="week-dot" id="wd4"></div>
+  </div>
+</header>
+
+<div class="day-tabs" id="dayTabs"></div>
+<div id="dayViews"></div>
+
+<div id="toast">✓ Séance terminée !</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const DAYS = [
+  {
+    id: "lundi",
+    label: "Lundi",
+    type: "Push",
+    icon: "🔥",
+    iconClass: "push",
+    desc: "Pectoraux · Épaules · Triceps",
+    exercises: [
+      {
+        name: "Développé couché",
+        sets: 4, reps: "8–12", rest: 120,
+        muscle: "Pecs", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
+        alts: [
+          { name: "Développé couché haltères", sets: "4×8–12" },
+          { name: "Pompes lestées", sets: "4×12–15" },
+          { name: "Presse à pecs machine", sets: "4×10–12" },
+        ]
+      },
+      {
+        name: "Développé épaules",
+        sets: 4, reps: "8–12", rest: 90,
+        muscle: "Épaules", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80",
+        alts: [
+          { name: "Arnold Press", sets: "4×10–12" },
+          { name: "Développé militaire barre", sets: "4×6–8" },
+          { name: "Pike Push-up", sets: "4×12" },
+        ]
+      },
+      {
+        name: "Écarté pecs",
+        sets: 3, reps: "10–15", rest: 75,
+        muscle: "Pecs", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=600&q=80",
+        alts: [
+          { name: "Cable Crossover", sets: "3×12–15" },
+          { name: "Pec Deck Machine", sets: "3×12–15" },
+          { name: "Pompes larges", sets: "3×15" },
+        ]
+      },
+      {
+        name: "Extension triceps poulie",
+        sets: 3, reps: "10–15", rest: 60,
+        muscle: "Triceps", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1612864980853-d7f4ca77cba0?w=600&q=80",
+        alts: [
+          { name: "Skull Crusher EZ", sets: "3×10–12" },
+          { name: "Dips banc triceps", sets: "3×12–15" },
+          { name: "Kickback haltère", sets: "3×12" },
+        ]
+      },
+      {
+        name: "Élévations latérales",
+        sets: 3, reps: "12–15", rest: 60,
+        muscle: "Deltoïdes", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1549476464-37392f717541?w=600&q=80",
+        alts: [
+          { name: "Élévations latérales câble", sets: "3×15" },
+          { name: "Face Pull poulie", sets: "3×15" },
+          { name: "Oiseau haltères", sets: "3×12–15" },
+        ]
+      },
+    ]
+  },
+  {
+    id: "mardi",
+    label: "Mardi",
+    type: "Pull",
+    icon: "💪",
+    iconClass: "pull",
+    desc: "Dos · Biceps · Arrière épaules",
+    exercises: [
+      {
+        name: "Tractions / Lat Pulldown",
+        sets: 4, reps: "6–10", rest: 120,
+        muscle: "Dos", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1598971639058-fab3c3109a34?w=600&q=80",
+        alts: [
+          { name: "Tractions lestées", sets: "4×6–8" },
+          { name: "Pullover câble", sets: "4×12" },
+          { name: "Rangée machine", sets: "4×10–12" },
+        ]
+      },
+      {
+        name: "Rowing barre",
+        sets: 4, reps: "8–12", rest: 90,
+        muscle: "Dos", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1544033527-b192daee1f5b?w=600&q=80",
+        alts: [
+          { name: "Rowing haltère unilatéral", sets: "4×10 / côté" },
+          { name: "Rowing câble assis", sets: "4×12" },
+          { name: "Rowing machine", sets: "4×10–12" },
+        ]
+      },
+      {
+        name: "Curl biceps barre",
+        sets: 3, reps: "10–12", rest: 75,
+        muscle: "Biceps", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&q=80",
+        alts: [
+          { name: "Curl haltères alterné", sets: "3×10–12" },
+          { name: "Curl câble", sets: "3×12–15" },
+          { name: "Curl marteau", sets: "3×12" },
+        ]
+      },
+      {
+        name: "Face Pull",
+        sets: 3, reps: "12–15", rest: 60,
+        muscle: "Arrière épaules", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80",
+        alts: [
+          { name: "Oiseau haltères", sets: "3×15" },
+          { name: "Reverse Pec Deck", sets: "3×15" },
+          { name: "Band pull-apart", sets: "3×20" },
+        ]
+      },
+      {
+        name: "Shrug haltères",
+        sets: 3, reps: "12–15", rest: 60,
+        muscle: "Trapèzes", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1652363722833-509b3aac287b?w=600&q=80",
+        alts: [
+          { name: "Shrug barre", sets: "3×12" },
+          { name: "Shrug câble", sets: "3×15" },
+          { name: "Farmer's Walk", sets: "3×30m" },
+        ]
+      },
+    ]
+  },
+  {
+    id: "mercredi",
+    label: "Mercredi",
+    type: "Jambes",
+    icon: "🦵",
+    iconClass: "legs",
+    desc: "Quadriceps · Ischios · Fessiers · Mollets",
+    exercises: [
+      {
+        name: "Squat barre",
+        sets: 4, reps: "6–10", rest: 150,
+        muscle: "Quadri / Fessiers", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1579126038374-6064753b6b0b?w=600&q=80",
+        alts: [
+          { name: "Goblet Squat haltère", sets: "4×12" },
+          { name: "Hack Squat machine", sets: "4×10–12" },
+          { name: "Leg Press", sets: "4×12–15" },
+        ]
+      },
+      {
+        name: "Romanian Deadlift",
+        sets: 4, reps: "8–10", rest: 120,
+        muscle: "Ischios / Fessiers", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1603287681836-b174ce5074c2?w=600&q=80",
+        alts: [
+          { name: "Leg Curl couché", sets: "4×12" },
+          { name: "Soulevé de terre jambes tendues", sets: "4×10" },
+          { name: "Bonne-nuit", sets: "4×12" },
+        ]
+      },
+      {
+        name: "Fentes marchées",
+        sets: 3, reps: "10–12", rest: 90,
+        muscle: "Quadri / Fessiers", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=600&q=80",
+        alts: [
+          { name: "Fentes bulgares", sets: "3×10 / jambe" },
+          { name: "Step-up box", sets: "3×12 / jambe" },
+          { name: "Fentes latérales", sets: "3×10" },
+        ]
+      },
+      {
+        name: "Leg Extension",
+        sets: 3, reps: "12–15", rest: 60,
+        muscle: "Quadriceps", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&q=80",
+        alts: [
+          { name: "Terminal Knee Extension", sets: "3×15" },
+          { name: "Wall Sit 45s", sets: "3×45s" },
+          { name: "Sissy Squat", sets: "3×12" },
+        ]
+      },
+      {
+        name: "Mollets debout",
+        sets: 4, reps: "15–20", rest: 60,
+        muscle: "Mollets", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1576511735645-c4e21e3b3600?w=600&q=80",
+        alts: [
+          { name: "Mollets assis machine", sets: "4×15" },
+          { name: "Mollets sur leg press", sets: "4×20" },
+          { name: "Sauts à la corde 1 min", sets: "4×1 min" },
+        ]
+      },
+    ]
+  },
+  {
+    id: "jeudi",
+    label: "Jeudi",
+    type: "Upper",
+    icon: "⚡",
+    iconClass: "upper",
+    desc: "Haut du corps complet · Force & Gainage",
+    exercises: [
+      {
+        name: "Développé incliné haltères",
+        sets: 4, reps: "8–12", rest: 90,
+        muscle: "Pecs hauts", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80",
+        alts: [
+          { name: "Développé incliné barre", sets: "4×8–10" },
+          { name: "Câble Fly incliné", sets: "4×12" },
+          { name: "Pompes inclinées lestées", sets: "4×12" },
+        ]
+      },
+      {
+        name: "Tirage poignée neutre",
+        sets: 4, reps: "8–12", rest: 90,
+        muscle: "Dos / Biceps", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1616803140344-6682afb09f73?w=600&q=80",
+        alts: [
+          { name: "Lat Pulldown prise serrée", sets: "4×10–12" },
+          { name: "Rowing bras tendus câble", sets: "4×12" },
+          { name: "Tractions supination", sets: "4×6–8" },
+        ]
+      },
+      {
+        name: "Développé assis haltères",
+        sets: 3, reps: "10–12", rest: 75,
+        muscle: "Épaules", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=600&q=80",
+        alts: [
+          { name: "Arnold Press", sets: "3×10" },
+          { name: "Push Press", sets: "3×8" },
+          { name: "Développé machine", sets: "3×12" },
+        ]
+      },
+      {
+        name: "Curl barre EZ",
+        sets: 3, reps: "10–12", rest: 60,
+        muscle: "Biceps", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1502904550040-7534597429ae?w=600&q=80",
+        alts: [
+          { name: "Curl concentré haltère", sets: "3×12" },
+          { name: "Curl câble barre EZ", sets: "3×12" },
+          { name: "21s barre EZ", sets: "3×21" },
+        ]
+      },
+      {
+        name: "Dips triceps",
+        sets: 3, reps: "10–15", rest: 60,
+        muscle: "Triceps", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=600&q=80",
+        alts: [
+          { name: "Pushdown corde", sets: "3×12–15" },
+          { name: "French Press haltère", sets: "3×12" },
+          { name: "Extension overhead câble", sets: "3×15" },
+        ]
+      },
+    ]
+  },
+  {
+    id: "vendredi",
+    label: "Vendredi",
+    type: "Core & Cardio",
+    icon: "🎯",
+    iconClass: "core",
+    desc: "Abdos · Gainage · Conditionnement",
+    exercises: [
+      {
+        name: "Planche",
+        sets: 4, reps: "30–60s", rest: 60,
+        muscle: "Core", badge: "Gainage",
+        img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+        alts: [
+          { name: "Planche latérale", sets: "4×30s / côté" },
+          { name: "Planche avec toucher d'épaule", sets: "4×20 rep" },
+          { name: "Planche sur bosu", sets: "4×40s" },
+        ]
+      },
+      {
+        name: "Crunch câble",
+        sets: 4, reps: "12–15", rest: 60,
+        muscle: "Abdos", badge: "Isolation",
+        img: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=600&q=80",
+        alts: [
+          { name: "Crunch décliné leste", sets: "4×15" },
+          { name: "Ab Wheel", sets: "4×10–12" },
+          { name: "Dragon Flag", sets: "4×8" },
+        ]
+      },
+      {
+        name: "Relevé de jambes suspendu",
+        sets: 3, reps: "10–15", rest: 75,
+        muscle: "Abdos bas", badge: "Composé",
+        img: "https://images.unsplash.com/photo-1607962837359-5e7e89f86776?w=600&q=80",
+        alts: [
+          { name: "Relevé de jambes sol", sets: "3×15" },
+          { name: "Flutter kicks 30s", sets: "3×30s" },
+          { name: "Mountain climbers 30s", sets: "3×30s" },
+        ]
+      },
+      {
+        name: "Russian Twist lesté",
+        sets: 3, reps: "15–20", rest: 60,
+        muscle: "Obliques", badge: "Rotation",
+        img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80",
+        alts: [
+          { name: "Bois de bûcheron câble", sets: "3×15 / côté" },
+          { name: "Pallof Press", sets: "3×12 / côté" },
+          { name: "Side Bend haltère", sets: "3×15" },
+        ]
+      },
+      {
+        name: "Sprint / Rameur HIIT",
+        sets: 5, reps: "20s effort / 40s repos", rest: 40,
+        muscle: "Cardio", badge: "HIIT",
+        img: "https://images.unsplash.com/photo-1608138278748-2f04b78d19dd?w=600&q=80",
+        alts: [
+          { name: "Burpees 20s ON / 40s OFF", sets: "5 rounds" },
+          { name: "Jump Rope 30s ON / 30s OFF", sets: "6 rounds" },
+          { name: "Vélo stationnaire sprint", sets: "5×20s" },
+        ]
+      },
+    ]
+  },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = {}; // { dayId: { exIdx: seriesDone } }
+let timers = {}; // active interval per exercise
+let currentDay = DAYS[0].id;
+
+DAYS.forEach(d => {
+  state[d.id] = {};
+  d.exercises.forEach((_, i) => { state[d.id][i] = 0; });
+});
+
+// ─────────────────────────────────────────────
+// BUILD UI
+// ─────────────────────────────────────────────
+const tabsEl   = document.getElementById('dayTabs');
+const viewsEl  = document.getElementById('dayViews');
+
+DAYS.forEach((day, di) => {
+  // TAB
+  const tab = document.createElement('div');
+  tab.className = 'tab-btn' + (di === 0 ? ' active' : '');
+  tab.id = 'tab-' + day.id;
+  tab.innerHTML = `<div class="tab-day">${day.label.slice(0,3)}</div><div class="tab-label">${day.type}</div>`;
+  tab.addEventListener('click', () => switchDay(day.id));
+  tabsEl.appendChild(tab);
+
+  // DAY VIEW
+  const view = document.createElement('div');
+  view.className = 'day-view' + (di === 0 ? ' visible' : '');
+  view.id = 'view-' + day.id;
+
+  // Day header
+  const doneCount = () => day.exercises.filter((ex, ei) => state[day.id][ei] >= ex.sets).length;
+
+  view.innerHTML = `
+    <div class="day-header" id="dh-${day.id}">
+      <div class="day-icon ${day.iconClass}">${day.icon}</div>
+      <div>
+        <div class="day-title">${day.label} — <span class="accent">${day.type}</span></div>
+        <div class="day-desc">${day.desc}</div>
+      </div>
+      <div class="day-progress">
+        <div class="prog-num" id="prog-${day.id}">0/${day.exercises.length}</div>
+        <div class="prog-label">exercices</div>
+      </div>
+    </div>
+    <div class="day-actions">
+      <button class="btn-reset" onclick="resetDay('${day.id}')">↺ Réinitialiser la journée</button>
+    </div>
+  `;
+
+  day.exercises.forEach((ex, ei) => {
+    const exId = `${day.id}-${ei}`;
+    const card = document.createElement('div');
+    card.className = 'exercise-card';
+    card.id = 'card-' + exId;
+
+    // Series dots HTML
+    let dotsHtml = '';
+    for (let s = 0; s < ex.sets; s++) {
+      dotsHtml += `<div class="sdot" id="dot-${exId}-${s}" onclick="toggleSerie('${day.id}', ${ei}, ${s})">${s+1}</div>`;
+    }
+
+    // Alts HTML
+    let altsHtml = ex.alts.map((a, ai) => `
+      <div class="alt-item">
+        <div class="alt-num">${ai+1}</div>
+        <div class="alt-name">${a.name}</div>
+        <div class="alt-sets">${a.sets}</div>
+      </div>`).join('');
+
+    card.innerHTML = `
+      <div class="ex-img-wrap">
+        <img class="ex-img" src="${ex.img}" alt="${ex.name}" loading="lazy">
+        <div class="ex-img-overlay"></div>
+        <div class="ex-badge">${ex.badge}</div>
+        <div class="ex-done-badge">✓ Terminé</div>
+        <div class="ex-img-name">${ex.name}</div>
+      </div>
+      <div class="ex-body">
+        <div class="ex-meta">
+          <div class="ex-tag highlight">${ex.sets} séries</div>
+          <div class="ex-tag">${ex.reps} reps</div>
+          <div class="ex-tag">${ex.muscle}</div>
+        </div>
+        <div class="series-row">
+          <div class="series-dots">${dotsHtml}</div>
+          <div class="series-label" id="sl-${exId}">0/${ex.sets} séries</div>
+        </div>
+        <div class="controls-row">
+          <div class="timer-wrap">
+            <div class="timer-display" id="timer-${exId}">${formatTime(ex.rest)}</div>
+          </div>
+          <button class="btn-go" onclick="startTimer('${exId}', ${ex.rest})">▶ Repos</button>
+          <button class="btn-serie" onclick="addSerie('${day.id}', ${ei})">+ Série</button>
+        </div>
+      </div>
+      <div class="alt-toggle" id="alttog-${exId}" onclick="toggleAlts('${exId}')">
+        <span>🔄 Exercices alternatifs (${ex.alts.length})</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="alt-list" id="altlist-${exId}">${altsHtml}</div>
+    `;
+
+    view.appendChild(card);
+  });
+
+  viewsEl.appendChild(view);
+});
+
+updateWeekBar();
+updateAllProgress();
+
+// ─────────────────────────────────────────────
+// FUNCTIONS
+// ─────────────────────────────────────────────
+
+function switchDay(dayId) {
+  document.querySelectorAll('.day-view').forEach(v => v.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + dayId).classList.add('visible');
+  document.getElementById('tab-' + dayId).classList.add('active');
+  currentDay = dayId;
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+function startTimer(exId, seconds) {
+  if (timers[exId]) { clearInterval(timers[exId]); }
+  let t = seconds;
+  const el = document.getElementById('timer-' + exId);
+  el.classList.add('running');
+  el.classList.remove('done-t');
+  timers[exId] = setInterval(() => {
+    t--;
+    el.textContent = formatTime(t);
+    if (t <= 0) {
+      clearInterval(timers[exId]);
+      el.textContent = "C'est reparti !";
+      el.classList.remove('running');
+      el.classList.add('done-t');
+      // vibrate if available
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+  }, 1000);
+}
+
+function toggleSerie(dayId, exIdx, serieIdx) {
+  const exId = `${dayId}-${exIdx}`;
+  const ex = DAYS.find(d => d.id === dayId).exercises[exIdx];
+  const current = state[dayId][exIdx];
+  const dot = document.getElementById(`dot-${exId}-${serieIdx}`);
+
+  if (serieIdx === current) {
+    // Add next serie
+    state[dayId][exIdx]++;
+  } else if (serieIdx === current - 1) {
+    // Remove last serie
+    state[dayId][exIdx]--;
+  }
+  refreshExercise(dayId, exIdx);
+  updateProgress(dayId);
+  updateWeekBar();
+}
+
+function addSerie(dayId, exIdx) {
+  const ex = DAYS.find(d => d.id === dayId).exercises[exIdx];
+  if (state[dayId][exIdx] < ex.sets) {
+    state[dayId][exIdx]++;
+    refreshExercise(dayId, exIdx);
+    updateProgress(dayId);
+    updateWeekBar();
+    // Auto-start timer
+    const exId = `${dayId}-${exIdx}`;
+    startTimer(exId, ex.rest);
+  }
+}
+
+function refreshExercise(dayId, exIdx) {
+  const exId = `${dayId}-${exIdx}`;
+  const ex = DAYS.find(d => d.id === dayId).exercises[exIdx];
+  const done = state[dayId][exIdx];
+  const card = document.getElementById('card-' + exId);
+
+  // Dots
+  for (let s = 0; s < ex.sets; s++) {
+    const dot = document.getElementById(`dot-${exId}-${s}`);
+    dot.classList.toggle('done', s < done);
+  }
+  // Label
+  document.getElementById(`sl-${exId}`).textContent = `${done}/${ex.sets} séries`;
+  // Card done
+  card.classList.toggle('done', done >= ex.sets);
+
+  if (done >= ex.sets) {
+    // Check if day fully done
+    const day = DAYS.find(d => d.id === dayId);
+    const allDone = day.exercises.every((e, i) => state[dayId][i] >= e.sets);
+    if (allDone) {
+      showToast("🔥 Séance terminée ! Bien joué !");
+      document.getElementById('tab-' + dayId).classList.add('tab-done');
+    }
+  }
+}
+
+function updateProgress(dayId) {
+  const day = DAYS.find(d => d.id === dayId);
+  const done = day.exercises.filter((ex, i) => state[dayId][i] >= ex.sets).length;
+  document.getElementById(`prog-${dayId}`).textContent = `${done}/${day.exercises.length}`;
+}
+
+function updateAllProgress() {
+  DAYS.forEach(d => updateProgress(d.id));
+}
+
+function updateWeekBar() {
+  DAYS.forEach((day, i) => {
+    const dot = document.getElementById('wd' + i);
+    const done = day.exercises.every((ex, ei) => state[day.id][ei] >= ex.sets);
+    const started = day.exercises.some((ex, ei) => state[day.id][ei] > 0);
+    dot.className = 'week-dot' + (done ? ' done' : started ? ' active' : '');
+  });
+}
+
+function toggleAlts(exId) {
+  const list = document.getElementById('altlist-' + exId);
+  const tog  = document.getElementById('alttog-' + exId);
+  list.classList.toggle('visible');
+  tog.classList.toggle('open');
+}
+
+function resetDay(dayId) {
+  const day = DAYS.find(d => d.id === dayId);
+  day.exercises.forEach((_, i) => { state[dayId][i] = 0; });
+  day.exercises.forEach((_, i) => {
+    refreshExercise(dayId, i);
+    const exId = `${dayId}-${i}`;
+    if (timers[exId]) { clearInterval(timers[exId]); }
+    document.getElementById('timer-' + exId).textContent = formatTime(day.exercises[i].rest);
+    document.getElementById('timer-' + exId).classList.remove('running', 'done-t');
+  });
+  updateProgress(dayId);
+  updateWeekBar();
+  document.getElementById('tab-' + dayId).classList.remove('tab-done');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
